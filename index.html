@@ -68,7 +68,7 @@
             for(var r=0; r<brickRowCount; r++) {
                 var b = bricks[c][r];
                 if(b.status == 1) {
-                    if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                    if(isHit(b.x, b.y)) {
                         dy = -dy;
                         b.status = 0;
                         score++;
@@ -81,6 +81,11 @@
             }
         }
     }
+
+    function isHit(bx, by, radius) {
+      return x + ballRadius > bx && x - ballRadius < bx+brickWidth && y + ballRadius > by && y - ballRadius < by+brickHeight
+    }
+
     function drawBall() {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI*2);
