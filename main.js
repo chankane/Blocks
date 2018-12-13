@@ -8,11 +8,14 @@ var paddle;
 var blocks;
 
 onload = () => {
+
+  document.addEventListener("mousemove", mouseMoveHandler, false);
+
   canvas = document.getElementById("myCanvas");
   ctx = canvas.getContext("2d");
 
   ball = new Ball(new Vector2(canvas.width / 2, canvas.height - 30));
-  ball.setVelocity(new Vector2(2, 2));
+  ball.setVelocity(new Vector2(4, 4));
   
   blocks = [];
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
@@ -21,7 +24,17 @@ onload = () => {
       blocks[j][i] = new Block(new Vector2(i * Block.SIZE.x, j * Block.SIZE.y));
     }
   }
+
+  paddle = new Paddle(new Vector2(canvas.width / 2, canvas.height - 30));
+
   requestAnimationFrame(loop);
+}
+
+function mouseMoveHandler(e) {
+  console.log(e);
+  let pos = paddle.getPosition();
+  pos.x = e.clientX - canvas.offsetLeft;
+  paddle.setPosition(pos);
 }
 
 function loop() {
@@ -33,8 +46,24 @@ function loop() {
 function move() {
   ball.move();
 
+  collisionDetectionOfPaddle();
   collisionDetectionOfWall();
   collisionDetectionOfBlocks();
+}
+
+function collisionDetectionOfPaddle() {
+  const posp = paddle.getPosition();
+  const posb = ball.getPosition();
+  let vel = ball.getVelocity();
+  const harf = Paddle.SIZE.x / 2;
+  if (
+    posp.y <= posb.y
+    && posp.x - harf <= posb.x
+    && posb.x <= posp.x + harf
+  ) {
+    vel.y = -vel.y;
+    ball.setVelocity(vel);
+  }
 }
 
 function collisionDetectionOfWall() {
@@ -56,9 +85,18 @@ function collisionDetectionOfBlocks() {
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
     for (let i = 0; i < BLOCK_NUM_Y; i++) {
       if(blocks[j][i] && blocks[j][i].isCollided(ball.getPosition())) {
-        delete blocks[j][i];
+        let topLeft = blocks[j][i].getPosition();
+        const centerOfBlock = new Vector2(topLeft.x + Block.SIZE.x / 2, topLeft.y + Block.SIZE.y / 2);
+        const positionOfBall = ball.getPosition();
+        const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x);
         let vel = ball.getVelocity();
-        ball.setVelocity(new Vector2(vel.x, -vel.y));
+        if (Math.abs(slope) >= Block.SIZE.y / Block.SIZE.x) {
+          vel.y = -vel.y;
+        } else {
+          vel.x = -vel.x;
+        }
+        delete blocks[j][i];
+        ball.setVelocity(vel);
       }
     }
   }
@@ -78,4 +116,6 @@ function repaint(ctx) {
       }
     }
   }
+
+  paddle.disp(ctx);
 }

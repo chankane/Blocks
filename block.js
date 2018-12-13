@@ -3,6 +3,10 @@ class Block {
     this._topLeft = topLeft;
   }
 
+  getPosition() {
+    return this._topLeft;
+  }
+
   disp() {
     //ctx.beginPath();
     ctx.strokeRect(this._topLeft.x, this._topLeft.y, Block.SIZE.x, Block.SIZE.y);
