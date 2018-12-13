@@ -21,7 +21,7 @@ onload = () => {
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
     blocks[j] = [];
     for (let i = 0; i < BLOCK_NUM_Y; i++) {
-      blocks[j][i] = new Block(new Vector2(i * Block.SIZE.x, j * Block.SIZE.y));
+      blocks[j][i] = new Block(new Vector2((i + 1) * Block.SIZE.x, (j + 2) * Block.SIZE.y));
     }
   }
 
@@ -61,8 +61,10 @@ function collisionDetectionOfPaddle() {
     && posp.x - harf <= posb.x
     && posb.x <= posp.x + harf
   ) {
-    vel.y = -vel.y;
-    ball.setVelocity(vel);
+    const deg = (posb.x - posp.x) * 45 / harf;
+    //vel.y = -vel.y;
+    //ball.setVelocity(vel);
+    vel.setDirection(deg - 90);
   }
 }
 
@@ -88,8 +90,14 @@ function collisionDetectionOfBlocks() {
         let topLeft = blocks[j][i].getPosition();
         const centerOfBlock = new Vector2(topLeft.x + Block.SIZE.x / 2, topLeft.y + Block.SIZE.y / 2);
         const positionOfBall = ball.getPosition();
-        const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x);
+        const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x + 2);
         let vel = ball.getVelocity();
+        vel.x /= Block.SIZE.x;
+        vel.x = Math.floor(vel.x);
+        vel.x *= Block.SIZE.x;
+        vel.y /= Block.SIZE.y;
+        vel.y = Math.floor(vel.y);
+        vel.y *= Block.SIZE.y;
         if (Math.abs(slope) >= Block.SIZE.y / Block.SIZE.x) {
           vel.y = -vel.y;
         } else {
@@ -100,6 +108,10 @@ function collisionDetectionOfBlocks() {
       }
     }
   }
+}
+
+function calcCollidePosition(ballPos) {
+  _
 }
 
 function repaint(ctx) {

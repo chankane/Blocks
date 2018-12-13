@@ -2,16 +2,19 @@ class Vector2 {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this._dx = this._dy = 0;
+    //this._dx = this._dy = 0;
   }
 
-  setDxDy(dx, dy) {
+  /*setDxDy(dx, dy) {
     this._dx = dx;
     this._dy = dy;
-  }
+  }*/
 
-  rotate(degree) {
-    //
+  setDirection(degree) {
+    const rad = degree * (Math.PI / 180);
+    const length = Math.sqrt(this.x * this.x + this.y * this.y);
+    this.x = Math.cos(rad) * length;
+    this.y = Math.sin(rad) * length;
   }
 }
 class Ball {
@@ -102,7 +105,7 @@ onload = () => {
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
     blocks[j] = [];
     for (let i = 0; i < BLOCK_NUM_Y; i++) {
-      blocks[j][i] = new Block(new Vector2(i * Block.SIZE.x, j * Block.SIZE.y));
+      blocks[j][i] = new Block(new Vector2((i + 1) * Block.SIZE.x, (j + 2) * Block.SIZE.y));
     }
   }
 
@@ -142,8 +145,10 @@ function collisionDetectionOfPaddle() {
     && posp.x - harf <= posb.x
     && posb.x <= posp.x + harf
   ) {
-    vel.y = -vel.y;
-    ball.setVelocity(vel);
+    const deg = (posb.x - posp.x) * 45 / harf;
+    //vel.y = -vel.y;
+    //ball.setVelocity(vel);
+    vel.setDirection(deg - 90);
   }
 }
 
@@ -169,8 +174,9 @@ function collisionDetectionOfBlocks() {
         let topLeft = blocks[j][i].getPosition();
         const centerOfBlock = new Vector2(topLeft.x + Block.SIZE.x / 2, topLeft.y + Block.SIZE.y / 2);
         const positionOfBall = ball.getPosition();
-        const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x);
+        const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x + 2);
         let vel = ball.getVelocity();
+
         if (Math.abs(slope) >= Block.SIZE.y / Block.SIZE.x) {
           vel.y = -vel.y;
         } else {
