@@ -90,6 +90,11 @@ var ctx;
 var ball;
 var paddle;
 var blocks;
+var timeLeft = 300;
+
+setInterval(() => {
+  timeLeft--;
+}, 1000);
 
 onload = () => {
 
@@ -99,7 +104,7 @@ onload = () => {
   ctx = canvas.getContext("2d");
 
   ball = new Ball(new Vector2(canvas.width / 2, canvas.height - 30));
-  ball.setVelocity(new Vector2(4, 4));
+  ball.setVelocity(new Vector2(5, 5));
   
   blocks = [];
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
@@ -115,7 +120,6 @@ onload = () => {
 }
 
 function mouseMoveHandler(e) {
-  console.log(e);
   let pos = paddle.getPosition();
   pos.x = e.clientX - canvas.offsetLeft;
   paddle.setPosition(pos);
@@ -125,6 +129,10 @@ function loop() {
   move();
   repaint(ctx);
   requestAnimationFrame(loop);
+  if (0 === timeLeft) {
+    alert("GAME OVER");
+    document.location.reload();
+  }
 }
 
 function move() {
@@ -171,12 +179,20 @@ function collisionDetectionOfBlocks() {
   for (let j = 0; j < BLOCK_NUM_Y; j++) {
     for (let i = 0; i < BLOCK_NUM_Y; i++) {
       if(blocks[j][i] && blocks[j][i].isCollided(ball.getPosition())) {
+        if (1 === getScore()) {
+          gameClear();
+        }
         let topLeft = blocks[j][i].getPosition();
         const centerOfBlock = new Vector2(topLeft.x + Block.SIZE.x / 2, topLeft.y + Block.SIZE.y / 2);
         const positionOfBall = ball.getPosition();
         const slope = (positionOfBall.y - centerOfBlock.y) / (positionOfBall.x - centerOfBlock.x + 2);
         let vel = ball.getVelocity();
-
+        /*vel.x /= Block.SIZE.x;
+        vel.x = Math.floor(vel.x);
+        vel.x *= Block.SIZE.x;
+        vel.y /= Block.SIZE.y;
+        vel.y = Math.floor(vel.y);
+        vel.y *= Block.SIZE.y;*/
         if (Math.abs(slope) >= Block.SIZE.y / Block.SIZE.x) {
           vel.y = -vel.y;
         } else {
@@ -188,6 +204,23 @@ function collisionDetectionOfBlocks() {
     }
   }
 }
+
+function getScore() {
+  let score = 0;
+  for (let i in blocks) {
+    score += Object.keys(blocks[i]).length;
+  }
+  return score;
+}
+
+function gameClear() {
+  alert("YOU WIN, CONGRATS!");
+  document.location.reload();
+}
+
+/*function calcCollidePosition(ballPos) {
+  _
+}*/
 
 function repaint(ctx) {
   // Clear screen
@@ -205,6 +238,21 @@ function repaint(ctx) {
   }
 
   paddle.disp(ctx);
+
+  drawScore();
+  drawTimeLeft();
+}
+
+function drawTimeLeft() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#0095DD";
+  ctx.fillText("Time left: " + timeLeft, canvas.width - 100, 20);
+}
+
+function drawScore() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#0095DD";
+  ctx.fillText("Score: " + getScore(), 8, 20);
 }
 class Paddle {
   constructor(centerPosition) {
